@@ -19,6 +19,7 @@ from tianshou.trainer import OnpolicyTrainer
 from tianshou.utils.net.common import ActorCritic
 from tianshou.utils.net.discrete import Actor, Critic, IntrinsicCuriosityModule
 
+torch.set_default_dtype(torch.float32)
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -53,6 +54,7 @@ def get_args() -> argparse.Namespace:
         "--device",
         type=str,
         default="cuda" if torch.cuda.is_available() else "cpu",
+        # default="mps"
     )
     parser.add_argument("--frames-stack", type=int, default=4)
     parser.add_argument("--resume-path", type=str, default=None)
@@ -190,8 +192,8 @@ def test_ppo(args: argparse.Namespace = get_args()) -> None:
         stack_num=args.frames_stack,
     )
     # collector
-    train_collector = Collector[CollectStats](policy, train_envs, buffer, exploration_noise=True)
-    test_collector = Collector[CollectStats](policy, test_envs, exploration_noise=True)
+    train_collector = Collector(policy, train_envs, buffer, exploration_noise=True)
+    test_collector = Collector(policy, test_envs, exploration_noise=True)
 
     # log
     now = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
